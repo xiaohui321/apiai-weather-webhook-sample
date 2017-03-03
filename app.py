@@ -68,10 +68,10 @@ def processRequest(req):
 
 def sendEmail(num):
     sg = sendgrid.SendGridAPIClient(apikey="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")
-    from_email = Email("google-assistant-orders@google.com")
-    subject = "Hello World from the SendGrid Python Library!"
+    from_email = Email("order@googleAssistant.com")
+    subject = "Order Confromation - Concert ticket"
     to_email = Email("xiaohuizhou@google.com")
-    content = Content("text/plain", "Hello, Email!")
+    content = Content("text/plain", "Please confirm your purchase by clicking this link:" + num)
     mail = Mail(from_email, subject, to_email, content)
     response = sg.client.mail.send.post(request_body=mail.get())
     print(response.status_code)
