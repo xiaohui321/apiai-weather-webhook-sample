@@ -10,6 +10,7 @@ from urllib.error import HTTPError
 
 import json
 import os
+import sendgrid
 
 from flask import Flask
 from flask import request
@@ -22,70 +23,36 @@ app = Flask(__name__)
 @app.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
-
+    
     print("Request:")
     print(json.dumps(req, indent=4))
-
+    
     res = processRequest(req)
-
     res = json.dumps(res, indent=4)
-    # print(res)
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
     return r
 
-
 def processRequest(req):
-    if req.get("result").get("action") != "yahooWeatherForecast":
+     if req.get("result").get("action") != "sendEmail":
         return {}
-    baseurl = "https://query.yahooapis.com/v1/public/yql?"
-    yql_query = makeYqlQuery(req)
-    if yql_query is None:
-        return {}
-    yql_url = baseurl + urlencode({'q': yql_query}) + "&format=json"
-    result = urlopen(yql_url).read()
-    data = json.loads(result)
-    res = makeWebhookResult(data)
-    return res
-
-
-def makeYqlQuery(req):
     result = req.get("result")
     parameters = result.get("parameters")
-    city = parameters.get("geo-city")
-    if city is None:
-        return None
-
-    return "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + city + "')"
-
-
-def makeWebhookResult(data):
-    query = data.get('query')
-    if query is None:
-        return {}
-
-    result = query.get('results')
-    if result is None:
-        return {}
-
-    channel = result.get('channel')
-    if channel is None:
-        return {}
-
-    item = channel.get('item')
-    location = channel.get('location')
-    units = channel.get('units')
-    if (location is None) or (item is None) or (units is None):
-        return {}
-
-    condition = item.get('condition')
-    if condition is None:
-        return {}
-
-    # print(json.dumps(item, indent=4))
-
-    speech = "Today in " + location.get('city') + ": " + condition.get('text') + \
-             ", the temperature is " + condition.get('temp') + " " + units.get('temperature')
+    ordinal = parameters.get("ordinal")
+    price = parameters.get("unit-currency")
+    which_one = parameters.get("Which-One")
+    num = -1
+    if ordinal = "first one" or price = "999 dollars" or which_one = "most expensive one":
+        num = 1
+    elif ordinal = "second one" or price = "499 dollars":
+        num = 2
+    elif ordinal = "third one" or price = "99 dollars" or which_one = "cheapest one":
+        num = 3
+    sendEmail(num);
+    
+    speech = "Sure. Buying these tickets now. " + \
+    "You will receive an confirmation email to finalize your purchase. " + \
+    "Hope you will have a fun night there!"
 
     print("Response:")
     print(speech)
@@ -98,6 +65,14 @@ def makeWebhookResult(data):
         "source": "apiai-weather-webhook-sample"
     }
 
+def sendEmail(num):
+    sg = sendgrid.SendGridClient("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")
+    message = sendgrid.Mail()
+    message.add_to("test@sendgrid.com")
+    message.set_from("google-assistant-demo@google.com")
+    message.set_subject("Concert Ticket Purchase Confirmation " + num)
+    message.set_html("and easy to do anywhere, even with Python")
+    sg.send(message)
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
