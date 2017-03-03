@@ -42,11 +42,11 @@ def processRequest(req):
     price = parameters.get("unit-currency")
     which_one = parameters.get("Which-One")
     num = -1
-    if ordinal = "first one" or price = "999 dollars" or which_one = "most expensive one":
+    if ordinal == "first one" or price == "999 dollars" or which_one == "most expensive one":
         num = 1
-    elif ordinal = "second one" or price = "499 dollars":
+    elif ordinal == "second one" or price == "499 dollars":
         num = 2
-    elif ordinal = "third one" or price = "99 dollars" or which_one = "cheapest one":
+    elif ordinal == "third one" or price == "99 dollars" or which_one == "cheapest one":
         num = 3
     sendEmail(num);
     
