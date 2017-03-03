@@ -11,6 +11,7 @@ from urllib.error import HTTPError
 import json
 import os
 import sendgrid
+from sendgrid.helpers.mail import *
 
 from flask import Flask
 from flask import request
@@ -66,13 +67,16 @@ def processRequest(req):
     }
 
 def sendEmail(num):
-    sg = sendgrid.SendGridClient("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")
-    message = sendgrid.Mail()
-    message.add_to("test@sendgrid.com")
-    message.set_from("google-assistant-demo@google.com")
-    message.set_subject("Concert Ticket Purchase Confirmation " + num)
-    message.set_html("and easy to do anywhere, even with Python")
-    sg.send(message)
+    sg = sendgrid.SendGridAPIClient(apikey="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")
+    from_email = Email("google-assistant-orders@google.com")
+    subject = "Hello World from the SendGrid Python Library!"
+    to_email = Email("xiaohuizhou@google.com")
+    content = Content("text/plain", "Hello, Email!")
+    mail = Mail(from_email, subject, to_email, content)
+    response = sg.client.mail.send.post(request_body=mail.get())
+    print(response.status_code)
+    print(response.body)
+    print(response.headers)
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
