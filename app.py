@@ -35,8 +35,6 @@ def webhook():
     return r
 
 def processRequest(req):
-    if req.get("result").get("action") != "sendEmail":
-        return {}
     result = req.get("result")
     parameters = result.get("parameters")
     ordinal = parameters.get("ordinal")
